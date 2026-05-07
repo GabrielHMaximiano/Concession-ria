@@ -1,2 +1,20 @@
 TODO.md
 *.class
+
+# Node
+node_modules/
+backend/node_modules/
+
+# Environment
+.env
+backend/.env
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
