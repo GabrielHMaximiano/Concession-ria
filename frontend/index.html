@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Concessionária CRUD</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>Concessionária - CRUD de Carros</h1>
+
+    <section class="card">
+      <h2 id="form-title">Cadastrar carro</h2>
+      <form id="carro-form">
+        <input type="hidden" id="carro-id" />
+        <div class="grid">
+          <label>ID
+            <input type="number" id="id" required min="1" />
+          </label>
+          <label>Marca
+            <input type="text" id="marca" required />
+          </label>
+          <label>Modelo
+            <input type="text" id="modelo" required />
+          </label>
+          <label>Ano
+            <input type="number" id="ano" required min="1886" />
+          </label>
+          <label>Preço
+            <input type="number" id="preco" required min="0" step="0.01" />
+          </label>
+        </div>
+        <div class="actions">
+          <button type="submit" id="btn-salvar">Salvar</button>
+          <button type="button" id="btn-cancelar" class="secondary hidden">Cancelar edição</button>
+        </div>
+      </form>
+      <p id="mensagem" class="mensagem"></p>
+    </section>
+
+    <section class="card">
+      <h2>Carros cadastrados</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Marca</th>
+            <th>Modelo</th>
+            <th>Ano</th>
+            <th>Preço</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="carros-body"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
