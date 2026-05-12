@@ -51,12 +51,13 @@ label {
   font-size: 14px;
 }
 
-input {
+input, textarea {
   background: #0b1220;
   border: 1px solid #334155;
   border-radius: 8px;
   color: var(--text);
   padding: 10px;
+  font-family: inherit;
 }
 
 .actions {
@@ -105,5 +106,43 @@ td.actions-cell {
 .mensagem {
   min-height: 22px;
   margin-top: 8px;
+  color: var(--muted);
+}
+
+.resultado {
+  margin-top: 12px;
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  background: #0b1220;
+  padding: 12px;
+}
+
+.resultado h3 {
+  margin: 0 0 8px;
+}
+
+.resultado p {
+  margin: 6px 0;
+}
+
+.drop-zone {
+  margin-top: 12px;
+  border: 2px dashed #334155;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.drop-zone.dragover {
+  border-color: var(--primary);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.lista-arquivos {
+  margin: 10px 0 0;
+  padding-left: 20px;
   color: var(--muted);
 }

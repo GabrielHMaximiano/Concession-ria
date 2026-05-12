@@ -55,6 +55,74 @@
         <tbody id="carros-body"></tbody>
       </table>
     </section>
+
+    <section class="card">
+      <h2>Análise por IA (Upload obrigatório de fotos)</h2>
+      <p class="mensagem">
+        Envie fotos obrigatórias: 2 laterais, 1 frontal, 1 traseira, 1 interna, 1 porta-malas e 1 capô aberto.
+      </p>
+
+      <form id="analise-form">
+        <div class="grid">
+          <label>ID do carro
+            <input type="number" id="analise-carro-id" required min="1" />
+          </label>
+          <label>Marca
+            <input type="text" id="analise-marca" required />
+          </label>
+          <label>Modelo
+            <input type="text" id="analise-modelo" required />
+          </label>
+          <label>Ano
+            <input type="number" id="analise-ano" required min="1886" />
+          </label>
+        </div>
+
+        <div class="grid">
+          <label>Lateral esquerda
+            <input type="file" id="foto-lateral-esquerda" accept="image/*" required />
+          </label>
+          <label>Lateral direita
+            <input type="file" id="foto-lateral-direita" accept="image/*" required />
+          </label>
+          <label>Frontal
+            <input type="file" id="foto-frontal" accept="image/*" required />
+          </label>
+          <label>Traseira
+            <input type="file" id="foto-traseira" accept="image/*" required />
+          </label>
+          <label>Interna
+            <input type="file" id="foto-interna" accept="image/*" required />
+          </label>
+          <label>Porta-malas
+            <input type="file" id="foto-porta-malas" accept="image/*" required />
+          </label>
+          <label>Capô aberto
+            <input type="file" id="foto-capo-aberto" accept="image/*" required />
+          </label>
+        </div>
+
+        <div id="drop-zone" class="drop-zone" tabindex="0">
+          Arraste e solte imagens aqui (ou clique para selecionar)
+        </div>
+        <input type="file" id="drop-zone-input" accept="image/*" multiple class="hidden" />
+        <ul id="drop-zone-lista" class="lista-arquivos"></ul>
+
+        <div class="actions">
+          <button type="submit">Analisar carro</button>
+        </div>
+      </form>
+
+      <div id="analise-resultado" class="resultado hidden">
+        <h3>Resultado da análise</h3>
+        <p><strong>Condição:</strong> <span id="res-condicao">-</span></p>
+        <p><strong>Score IA:</strong> <span id="res-score">-</span></p>
+        <p><strong>Valor de referência:</strong> <span id="res-referencia">-</span></p>
+        <p><strong>Valor sugerido:</strong> <span id="res-sugerido">-</span></p>
+      </div>
+
+      <p id="analise-mensagem" class="mensagem"></p>
+    </section>
   </main>
 
   <script src="script.js"></script>
