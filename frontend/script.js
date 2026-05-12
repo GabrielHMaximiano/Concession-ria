@@ -12,9 +12,39 @@ const mensagem = document.getElementById('mensagem');
 const formTitle = document.getElementById('form-title');
 const btnCancelar = document.getElementById('btn-cancelar');
 
+const analiseForm = document.getElementById('analise-form');
+const analiseCarroIdInput = document.getElementById('analise-carro-id');
+const analiseMarcaInput = document.getElementById('analise-marca');
+const analiseModeloInput = document.getElementById('analise-modelo');
+const analiseAnoInput = document.getElementById('analise-ano');
+const analiseMensagem = document.getElementById('analise-mensagem');
+const analiseResultado = document.getElementById('analise-resultado');
+const resCondicao = document.getElementById('res-condicao');
+const resScore = document.getElementById('res-score');
+const resReferencia = document.getElementById('res-referencia');
+const resSugerido = document.getElementById('res-sugerido');
+
+const fotoLateralEsquerdaInput = document.getElementById('foto-lateral-esquerda');
+const fotoLateralDireitaInput = document.getElementById('foto-lateral-direita');
+const fotoFrontalInput = document.getElementById('foto-frontal');
+const fotoTraseiraInput = document.getElementById('foto-traseira');
+const fotoInternaInput = document.getElementById('foto-interna');
+const fotoPortaMalasInput = document.getElementById('foto-porta-malas');
+const fotoCapoAbertoInput = document.getElementById('foto-capo-aberto');
+
+const dropZone = document.getElementById('drop-zone');
+const dropZoneInput = document.getElementById('drop-zone-input');
+const dropZoneLista = document.getElementById('drop-zone-lista');
+let dropZoneFiles = [];
+
 function setMensagem(texto, erro = false) {
   mensagem.textContent = texto;
   mensagem.style.color = erro ? '#fca5a5' : '#9ca3af';
+}
+
+function setAnaliseMensagem(texto, erro = false) {
+  analiseMensagem.textContent = texto;
+  analiseMensagem.style.color = erro ? '#fca5a5' : '#9ca3af';
 }
 
 function resetForm() {
@@ -164,6 +194,144 @@ btnCancelar.addEventListener('click', () => {
   setMensagem('Edição cancelada.');
 });
 
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderDropZoneLista() {
+  dropZoneLista.innerHTML = '';
+  dropZoneFiles.forEach((file, index) => {
+    const li = document.createElement('li');
+    li.textContent = `${index + 1}. ${file.name}`;
+    dropZoneLista.appendChild(li);
+  });
+}
+
+dropZone.addEventListener('click', () => dropZoneInput.click());
+dropZone.addEventListener('dragover', (event) => {
+  event.preventDefault();
+  dropZone.classList.add('dragover');
+});
+dropZone.addEventListener('dragleave', () => {
+  dropZone.classList.remove('dragover');
+});
+dropZone.addEventListener('drop', (event) => {
+  event.preventDefault();
+  dropZone.classList.remove('dragover');
+  const novosArquivos = Array.from(event.dataTransfer.files || []).filter((file) => file.type.startsWith('image/'));
+  dropZoneFiles = [...dropZoneFiles, ...novosArquivos];
+  renderDropZoneLista();
+});
+
+dropZoneInput.addEventListener('change', (event) => {
+  const novosArquivos = Array.from(event.target.files || []).filter((file) => file.type.startsWith('image/'));
+  dropZoneFiles = [...dropZoneFiles, ...novosArquivos];
+  renderDropZoneLista();
+});
+
+async function enviarAnalise(event) {
+  event.preventDefault();
+
+  const obrigatorias = [
+    { categoria: 'lateral_esquerda', input: fotoLateralEsquerdaInput },
+    { categoria: 'lateral_direita', input: fotoLateralDireitaInput },
+    { categoria: 'frontal', input: fotoFrontalInput },
+    { categoria: 'traseira', input: fotoTraseiraInput },
+    { categoria: 'interna', input: fotoInternaInput },
+    { categoria: 'porta_malas', input: fotoPortaMalasInput },
+    { categoria: 'capo_aberto', input: fotoCapoAbertoInput }
+  ];
+
+  try {
+    const obrigatoriasComArquivo = [];
+    for (const item of obrigatorias) {
+      const file = item.input.files?.[0];
+      if (!file) {
+        setAnaliseMensagem(`Falta a foto obrigatória: ${item.categoria.replace('_', ' ')}`, true);
+        analiseResultado.classList.add('hidden');
+        return;
+      }
+      obrigatoriasComArquivo.push({
+        categoria: item.categoria,
+        nome: file.name,
+        conteudo: await fileToDataUrl(file)
+      });
+    }
+
+    const adicionais = [];
+    for (const file of dropZoneFiles) {
+      adicionais.push({
+        categoria: 'adicional',
+        nome: file.name,
+        conteudo: await fileToDataUrl(file)
+      });
+    }
+
+    const fotos = [...obrigatoriasComArquivo, ...adicionais];
+
+    const payload = {
+      carro_id: Number(analiseCarroIdInput.value),
+      marca: analiseMarcaInput.value.trim(),
+      modelo: analiseModeloInput.value.trim(),
+      ano: Number(analiseAnoInput.value),
+      fotos
+    };
+
+    if (
+      Number.isNaN(payload.carro_id) ||
+      payload.carro_id <= 0 ||
+      !payload.marca ||
+      !payload.modelo ||
+      Number.isNaN(payload.ano) ||
+      fotos.length < 7
+    ) {
+      setAnaliseMensagem('Preencha os campos da análise corretamente.', true);
+      analiseResultado.classList.add('hidden');
+      return;
+    }
+
+    setAnaliseMensagem('Enviando fotos para análise...');
+    const response = await fetch(`${API_BASE}/analise`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const body = await response.json();
+    if (!response.ok) {
+      if (Array.isArray(body.detalhes) && body.detalhes.length > 0) {
+        const textoDetalhes = body.detalhes
+          .map((d) => `${d.categoria}: ${d.motivo}`)
+          .join(' | ');
+        throw new Error(`${body.error || 'Fotos inválidas'} - ${textoDetalhes}`);
+      }
+      throw new Error(body.error || 'Erro ao analisar veículo');
+    }
+
+    const analiseIA = body.analise_ia || {};
+    resCondicao.textContent = analiseIA.condicao ?? '-';
+    resScore.textContent = analiseIA.score ?? '-';
+    resReferencia.textContent = typeof analiseIA.valor_referencia === 'number'
+      ? `R$ ${analiseIA.valor_referencia.toFixed(2)}`
+      : '-';
+    resSugerido.textContent = typeof analiseIA.valor_sugerido === 'number'
+      ? `R$ ${analiseIA.valor_sugerido.toFixed(2)}`
+      : '-';
+
+    analiseResultado.classList.remove('hidden');
+    setAnaliseMensagem('Análise concluída com sucesso.');
+  } catch (error) {
+    analiseResultado.classList.add('hidden');
+    setAnaliseMensagem(`Erro na análise: ${error.message}`, true);
+  }
+}
+
 form.addEventListener('submit', salvarCarro);
+analiseForm.addEventListener('submit', enviarAnalise);
 
 carregarCarros();
